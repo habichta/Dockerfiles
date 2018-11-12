@@ -1,0 +1,100 @@
+FROM ubuntu:18.04
+
+LABEL maintainer="Arthur Habicht (arthur.habicht@ti8m.ch)"
+
+
+ENV DEBIAN_FRONTEND noninteractive
+
+RUN useradd -ms /bin/bash ai
+
+
+
+# Install some dependencies
+RUN apt-get update && apt-get install -yq \
+		build-essential \
+		cmake \
+		curl \
+		g++ \
+		git \
+		nano \
+		unzip \
+		vim \
+		wget \
+		xorg \
+                xvfb \
+		python3.6 \
+		python3-dev \
+		python3-pip \
+		python3-numpy \
+		python3-scipy \
+		python3-nose \
+		python3-h5py \
+		python3-skimage \
+		python3-matplotlib \
+		python3-pandas \
+		python3-sklearn \
+		qtbase5-dev \
+		&& \
+        apt-get clean && \
+	apt-get autoremove && \
+	rm -rf /var/lib/apt/lists/*
+
+# Install other useful Python packages using pip
+RUN pip3 --no-cache-dir install \
+		Pillow \
+		wheel 
+
+
+# Install TensorFlow
+RUN pip3 --no-cache-dir install --upgrade tensorflow
+# Install Keras
+RUN pip3 --no-cache-dir install --upgrade keras
+
+# Install PyTorch
+RUN pip3 --no-cache-dir install http://download.pytorch.org/whl/cpu/torch-0.4.1-cp36-cp36m-linux_x86_64.whl
+RUN pip3 --no-cache-dir install torchvision
+
+# Install OpenAI Gym
+RUN pip3 install gym
+
+# Install DeepMind TRFL
+RUN pip3 install git+git://github.com/deepmind/trfl.git
+
+# Install DeepMind Starcraft II Environment
+RUN pip3 install pysc2
+
+# Install DeepMind Sonnet
+RUN pip3 install dm-sonnet
+
+# Install OpenCV
+#RUN git clone --depth 1 https://github.com/opencv/opencv.git /root/opencv && \
+#	cd /root/opencv && \
+#	mkdir build && \
+#	cd build && \
+#	cmake -DWITH_QT=ON -DWITH_OPENGL=ON -DFORCE_VTK=ON -DWITH_TBB=ON -DWITH_GDAL=ON -DWITH_XINE=ON -DBUILD_EXAMPLES=ON .. && \
+#	make -j"$(nproc)"  && \
+#	make install && \
+#	ldconfig && \
+#	echo 'ln /dev/null /dev/raw1394' >> ~/.bashrc
+
+#Jupyter
+RUN pip3 install --upgrade --force-reinstall --no-cache-dir jupyter
+
+WORKDIR /home/ai
+
+# Set up notebook config
+COPY jupyter_notebook_config.py /home/ai/.jupyter/
+
+COPY run_jupyter.sh /home/ai
+
+RUN mkdir /home/ai/data/
+
+VOLUME /home/ai/data/
+
+# Expose Ports for TensorBoard (6006), Ipython (8888)
+EXPOSE 6006 8888
+
+USER ai
+
+#CMD ["/bin/bash"]
+ENTRYPOINT ["sh","run_jupyter.sh"]
