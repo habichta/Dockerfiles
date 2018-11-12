@@ -1,0 +1,26 @@
+Contains CPU Version of Tensorflow, Keras, Pytorch and all dependencies. Python 3.6 only
+Based on Ubuntu 18.04
+
+
+
+Build Image:
+  docker build -t habichta/deeplearning:cpu -f Dockerfile.cpu .
+
+This is not necessary, the image is published on Docker Hub
+
+Run Environment:
+  docker run  -p 8888:8888 -p 6006:6006 habichta/deeplearning:cpu
+  
+Opens a jupyter notebook server at localhost:8888 . Token is shown on after sucessfully running the container
+
+Start interactive shell:
+  docker exec -it <containerID> bash
+  
+User "ai" is created, There is a volume mounted at /home/ai/data/ to transfer data into the container and sustain it.
+
+check 
+   docker inspect <containerID> 
+   
+to find local mountpoint of the volume
+
+Tensorboard is exposed at localhost:6006
